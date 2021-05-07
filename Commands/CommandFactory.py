@@ -47,6 +47,7 @@ class CommandFactory(object):
             Weather(),
             Reminder(),
             Exchange(),
+            Calculations(),
             self.__HelpCommand(self),
             ]
 

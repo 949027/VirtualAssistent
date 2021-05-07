@@ -13,22 +13,37 @@ class Exchange(AbstractCommand):
 
     @property
     def help(self) -> str:
-        return 'Currency conversion into Russian rubles\nFor example: EXCHANGE 100 USD\n'
+        return 'Currency Converter\nFor example: EXCHANGE 100USD RUB\n'
 
     def can_execute(self, command: str) -> bool:
-        self._match = re.search(rf'^{self.name} (\d+) (\w\w\w)$', command)
+        self._match = re.search(rf'^{self.name} (\d+)(\w\w\w) (\w\w\w)$', command)
         return bool(self._match)
 
     def execute(self):
         try:
-            currency_code = self._match.group(2)
-            currency_value = int(self._match.group(1))
+            money_code_1 = (self._match.group(2))
+            money_code_2 = (self._match.group(3))
+            value = int(self._match.group(1))
             reqest = requests.get('https://www.cbr.ru/currency_base/daily/')
             reqest.encoding = 'utf8'
-            list_parsing = re.findall(r'(\w+)', reqest.text)
-            currency_code_parsing: int = list_parsing.index(currency_code)
-            currencies_parsing = float(list_parsing[currency_code_parsing + 10] + '.' + list_parsing[currency_code_parsing + 11]) / float(list_parsing[currency_code_parsing + 3])
-            result = round(currencies_parsing * currency_value, 2)
-            print(currency_value, currency_code, '=', result, 'RUB')
+            list_parsing = re.findall(r'([A-Z0-9]+)', reqest.text)
+
+            if money_code_1 != 'RUB':
+                index_code_1: int = list_parsing.index(money_code_1)
+                currencies_1 = float(list_parsing[index_code_1 + 2] + '.' + list_parsing[index_code_1 + 3]) / float(
+                    list_parsing[index_code_1 + 1])
+            else:
+                currencies_1 = 1
+
+            if money_code_2 != 'RUB':
+                index_code_2: int = list_parsing.index(money_code_2)
+                currencies_2 = float(
+                    list_parsing[index_code_2 + 2] + '.' + list_parsing[index_code_2 + 3]) / float(
+                    list_parsing[index_code_2 + 1])
+            else:
+                currencies_2 = 1
+
+            result = round(currencies_1 * value / currencies_2, 2)
+            print(value, money_code_1, '=', result, money_code_2)
         except:
-            print('Error!')
+            print('Error! Check the entered currency codes.')

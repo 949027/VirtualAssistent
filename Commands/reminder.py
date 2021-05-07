@@ -20,17 +20,24 @@ class Reminder(AbstractCommand):
         return bool(self._match)
 
     def execute(self):
-        notification = input('What to remind?')
-        print('Reminder set')
-        time_target = datetime.datetime.now()
-        time_target = time_target.replace(year=int(self._match.group(1)), month=int(self._match.group(2)), day=int(self._match.group(3)), hour=int(self._match.group(4)), minute=int(self._match.group(5)),
-                                          second=0,
-                                          microsecond=0)
+
         def wait():
             while datetime.datetime.now() < time_target:
                 time.sleep(1)
             else:
-                print(notification)
+                print('\n<REMINDER> :', notification, '\n==> ')
+        try:
+            time_target = datetime.datetime.now()
+            time_target = time_target.replace(year=int(self._match.group(1)), month=int(self._match.group(2)), day=int(self._match.group(3)), hour=int(self._match.group(4)), minute=int(self._match.group(5)),
+                                          second=0,
+                                          microsecond=0)
+            if datetime.datetime.now() > time_target: raise Exception()
+            notification = input('What to remind?\n')
+            print('Reminder set')
+            th = Thread(target=wait, args=())
+            th.start()
+        except:
+            print('Incorrect set time. Check your input')
 
-        th = Thread(target=wait, args=())
-        th.start()
+
+
