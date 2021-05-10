@@ -16,7 +16,7 @@ class Calculations(AbstractCommand):
 
     @property
     def help(self) -> str:
-        return 'Calculation one of the roots of an equation like f(x) = 0. All characters must be lowercase\nFor example: CALC sin(x)\n'
+        return 'Calculation one of the roots of an equation like f(x) = 0 in a given interval. All characters must be lowercase\nFor example: CALC sin(x) -1.00 1.00\n'
 
     def can_execute(self, command: str) -> bool:
         self._match = re.search(rf'^{self.name} (\S+) (\S+.\d+) (\S+.\d+)$', command)
