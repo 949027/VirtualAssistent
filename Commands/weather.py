@@ -16,7 +16,7 @@ class Weather(AbstractCommand):
         return 'The weather forecast for tomorrow\nFor example: WEATHER Tomsk\n'
 
     def can_execute(self, command: str) -> bool:
-        self._match = re.search(rf'^{self.name} (\D+[A-Za-z])$', command)
+        self._match = re.search(rf'^{self.name} (\D+)$', command)
         return bool(self._match)
 
     def execute(self):
@@ -25,11 +25,14 @@ class Weather(AbstractCommand):
         config_dict['language'] = 'en'
         owm = OWM('6d00d1d4e704068d70191bad2673e0cc', config_dict)
         reg = owm.city_id_registry()
-        mgr = owm.weather_manager()
-        #проверка на полное совпадение
+
         try:
-            list_of_locations = reg.locations_for(city)
-            city = list_of_locations[0]
+            mgr = owm.weather_manager()
+            observation = mgr.weather_at_place(city)
+            #print(observation.location)
+            w = re.findall('(\d+.\d+)', str(observation.location))
+            lon = float(w[1])
+            lat = float(w[2])
         except:
             #проверка на частичное совпадение
             try:
@@ -45,9 +48,11 @@ class Weather(AbstractCommand):
                 #выбор пользователя и проверка
                 try:
                     select = int(input('\nSeveral matches were found. Enter a suitable number\n--> '))
-                    city = list_of_tuples[select - 1][1]
-                    list_of_locations = reg.locations_for(city)
-                    city = list_of_locations[0]
+                    city_finded = list_of_tuples[select - 1][1]
+                    list_of_locations = reg.locations_for(city_finded)
+                    city_finded = list_of_locations[0]
+                    lat = city_finded.lat
+                    lon = city_finded.lon
                     if select < 1:
                         print('Incorrected input\n')
                         return ()
@@ -55,9 +60,8 @@ class Weather(AbstractCommand):
                     print('Incorrected input\n')
                     return ()
 
-        print('Wait forecast for', city.name, '...\n')
-        lat = city.lat
-        lon = city.lon
+        print('Wait forecast for', city, '...\n')
+
         one_call = mgr.one_call(lat, lon)
         for i in range(3):
             print(datetime.now().date() + timedelta(days=1 + i))
